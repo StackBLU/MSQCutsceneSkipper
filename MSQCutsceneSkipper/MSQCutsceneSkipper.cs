@@ -1,4 +1,4 @@
-using Dalamud;
+﻿using Dalamud;
 using Dalamud.Game;
 using Dalamud.IoC;
 using Dalamud.Plugin;
@@ -10,88 +10,77 @@ namespace MSQCutsceneSkipper
 {
 	public class MSQCutsceneSkipper : IDalamudPlugin
 	{
-		[PluginService] public static IDalamudPluginInterface Interface { get; private set; }
-		[PluginService] public static ISigScanner SigScanner { get; private set; }
-		[PluginService] public static ICommandManager CommandManager { get; private set; }
-		[PluginService] public static IChatGui ChatGui { get; private set; }
-		[PluginService] public static IPluginLog PluginLog { get; private set; }
+		private const short SkipValueEnabled = -28528;
+		private const short SkipValueDisabledOffset1 = 13173;
+		private const short SkipValueDisabledOffset2 = 6260;
+		private readonly CutsceneAddressResolver cutsceneAddressResolver;
 
-		public CutsceneAddressResolver Address { get; }
+		[PluginService] private ISigScanner SigScanner { get; set; }
+		[PluginService] private ICommandManager CommandManager { get; set; }
+		[PluginService] private IChatGui ChatGui { get; set; }
+		[PluginService] public static IPluginLog PluginLog { get; set; }
 
 		public MSQCutsceneSkipper()
 		{
-			Address = new CutsceneAddressResolver();
-			Address.Setup(SigScanner);
+			cutsceneAddressResolver = new CutsceneAddressResolver();
+			cutsceneAddressResolver.Setup(SigScanner);
 
-			if (Address.Valid)
+			if (!cutsceneAddressResolver.Valid)
 			{
-				PluginLog.Information("Cutscene offset found");
-				SetEnabled(true);
-			}
-			else
-			{
-				PluginLog.Error("Cutscene offset not found");
+				PluginLog.Error("Cutscene offset not found.");
 				PluginLog.Warning("Plugin disabling...");
 				Dispose();
 				return;
 			}
+
+			PluginLog.Information("Cutscene offsets found");
+			SetCutsceneSkip(true);
+		}
+
+		private void SetCutsceneSkip(bool enabled)
+		{
+			_ = SafeMemory.Write(cutsceneAddressResolver.Offset1, enabled ? SkipValueEnabled : SkipValueDisabledOffset1);
+			_ = SafeMemory.Write(cutsceneAddressResolver.Offset2, enabled ? SkipValueEnabled : SkipValueDisabledOffset2);
 		}
 
 		public void Dispose()
 		{
-			SetEnabled(false);
+			SetCutsceneSkip(false);
 			GC.SuppressFinalize(this);
-		}
-
-
-
-		public void SetEnabled(bool isEnable)
-		{
-			if (!Address.Valid)
-			{
-				return;
-			}
-
-			if (isEnable)
-			{
-				_ = SafeMemory.Write<short>(Address.Offset1, -28528);
-				_ = SafeMemory.Write<short>(Address.Offset2, -28528);
-			}
-			else
-			{
-				_ = SafeMemory.Write<short>(Address.Offset1, 13173);
-				_ = SafeMemory.Write<short>(Address.Offset2, 6260);
-			}
 		}
 	}
 
 	public class CutsceneAddressResolver : BaseAddressResolver
 	{
+		private const string Offset1Pattern = "75 33 48 8B 0D ?? ?? ?? ?? BA ?? 00 00 00 48 83 C1 10 E8 ?? ?? ?? ?? 83 78";
+		private const string Offset2Pattern = "74 18 8B D7 48 8D 0D";
+		private readonly nint _baseAddress = Process.GetCurrentProcess().MainModule!.BaseAddress;
+
 		public bool Valid
 		{
 			get
 			{
-				return Offset1 != nint.Zero && Offset2 != nint.Zero;
+				return Offset1 != IntPtr.Zero && Offset2 != IntPtr.Zero;
 			}
 		}
 
-		public nint Offset1 { get; private set; }
-		public nint Offset2 { get; private set; }
+		public IntPtr Offset1 { get; private set; }
+		public IntPtr Offset2 { get; private set; }
 
 		protected override void Setup64Bit(ISigScanner sig)
 		{
-			Offset1 = sig.ScanText("75 33 48 8B 0D ?? ?? ?? ?? BA ?? 00 00 00 48 83 C1 10 E8 ?? ?? ?? ?? 83 78");
-			Offset2 = sig.ScanText("74 18 8B D7 48 8D 0D");
+			Offset1 = sig.ScanText(Offset1Pattern);
+			Offset2 = sig.ScanText(Offset2Pattern);
+			LogOffsets();
+		}
 
-			MSQCutsceneSkipper.PluginLog.Information(
-				"Offset1: [\"ffxiv_dx11.exe\"+{0}]",
-				(Offset1.ToInt64() - Process.GetCurrentProcess().MainModule!.BaseAddress.ToInt64()).ToString("X")
-				);
+		private void LogOffsets()
+		{
+			long offset1FromBase = Offset1 - _baseAddress;
+			long offset2FromBase = Offset2 - _baseAddress;
 
-			MSQCutsceneSkipper.PluginLog.Information(
-				"Offset2: [\"ffxiv_dx11.exe\"+{0}]",
-				(Offset2.ToInt64() - Process.GetCurrentProcess().MainModule!.BaseAddress.ToInt64()).ToString("X")
-				);
+			MSQCutsceneSkipper.PluginLog.Information($"Offset1: [\"ffxiv_dx11.exe\"+{offset1FromBase:X}]");
+			MSQCutsceneSkipper.PluginLog.Information($"Offset2: [\"ffxiv_dx11.exe\"+{offset2FromBase:X}]");
 		}
 	}
 }
