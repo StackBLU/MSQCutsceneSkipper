@@ -5,7 +5,6 @@ using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using System;
 using System.Diagnostics;
-using System.Security.Cryptography;
 
 namespace MSQCutsceneSkipper
 {
@@ -18,8 +17,6 @@ namespace MSQCutsceneSkipper
 		[PluginService] public static IPluginLog PluginLog { get; private set; }
 
 		public CutsceneAddressResolver Address { get; }
-		private readonly RandomNumberGenerator _csp;
-		private readonly decimal _base = uint.MaxValue;
 
 		public MSQCutsceneSkipper()
 		{
@@ -28,13 +25,13 @@ namespace MSQCutsceneSkipper
 
 			if (Address.Valid)
 			{
-				PluginLog.Information("Cutscene Offset Found.");
+				PluginLog.Information("Cutscene offset found");
 				SetEnabled(true);
 			}
 			else
 			{
-				PluginLog.Error("Cutscene Offset Not Found.");
-				PluginLog.Warning("Plugin Disabling...");
+				PluginLog.Error("Cutscene offset not found");
+				PluginLog.Warning("Plugin disabling...");
 				Dispose();
 				return;
 			}
