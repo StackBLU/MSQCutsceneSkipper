@@ -20,7 +20,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Dalamud">
-      <HintPath>..\Lib\Dalamud\Dalamud.dll</HintPath>
+      <HintPath>..\Dalamud\Dalamud.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>
