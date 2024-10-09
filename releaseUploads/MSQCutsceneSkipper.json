@@ -2,6 +2,7 @@
   "Author": "Stack",
   "Name": "MSQ Cutscene Skipper",
   "InternalName": "MSQCutsceneSkipper",
+  "AssemblyVersion": "0.0.0.0",
   "Description": "Skip cutscenes in \"Castrum Meridianum\", \"The Praetorium\", and \"The Porta Decumana\"!",
   "ApplicableVersion": "any",
   "RepoUrl": "https://github.com/StackBLU/MSQCutsceneSkipper",
