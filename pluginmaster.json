@@ -3,7 +3,7 @@
     "Author": "Stack",
     "Name": "MSQ Cutscene Skipper",
     "InternalName": "MSQCutsceneSkipper",
-    "AssemblyVersion": "1.0.0.0",
+    "AssemblyVersion": "1.0.0.1",
     "Description": "Skip cutscenes in \"Castrum Meridianum\", \"The Praetorium\", and \"The Porta Decumana\"!",
     "ApplicableVersion": "any",
     "RepoUrl": "https://github.com/StackBLU/MSQCutsceneSkipper",
@@ -14,12 +14,11 @@
       "skip",
       "msq"
     ],
-    "DalamudApiLevel": 10,
+    "DalamudApiLevel": 11,
     "LoadRequiredState": 0,
     "LoadSync": false,
     "CanUnloadAsync": false,
     "LoadPriority": 0,
-    "IconUrl": "https://raw.githubusercontent.com/StackBLU/UltimateCombo/main/images/logo.png",
     "Punchline": "Skip cutscenes in \"Castrum Meridianum\", \"The Praetorium\", and \"The Porta Decumana\"!",
     "AcceptsFeedback": false
   }
