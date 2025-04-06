@@ -20,6 +20,9 @@
     <NoWarn>1701;1702;CA1416</NoWarn>
   </PropertyGroup>
   <ItemGroup>
+    <None Remove="MSQCutsceneSkipper.json" />
+  </ItemGroup>
+  <ItemGroup>
     <Reference Include="Dalamud">
       <HintPath>..\Dalamud\Dalamud.dll</HintPath>
       <Private>False</Private>
