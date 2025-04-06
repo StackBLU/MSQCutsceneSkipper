@@ -16,8 +16,6 @@ namespace MSQCutsceneSkipper
 		private readonly CutsceneAddressResolver cutsceneAddressResolver;
 
 		[PluginService] private ISigScanner SigScanner { get; set; }
-		[PluginService] private ICommandManager CommandManager { get; set; }
-		[PluginService] private IChatGui ChatGui { get; set; }
 		[PluginService] public static IPluginLog PluginLog { get; set; }
 
 		public MSQCutsceneSkipper()
